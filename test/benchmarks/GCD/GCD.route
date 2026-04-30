@@ -1,0 +1,114 @@
+UCLA route 1.0
+
+Grid : 3 3 6
+VerticalCapacity : 0 66 0 66 0 66 
+HorizontalCapacity : 66 0 66 0 66 0 
+MinWireWidth : 1 1 1 1 2 2 
+MinWireSpacing : 1 1 1 1 2 2 
+ViaSpacing : 0 0 0 0 0 0 
+GridOrigin : 0 0
+TileSize : 25200 25200
+BlockagePorosity : 0
+
+NumBlockageNodes : 100
+
+PHY_EDGE_ROW_0_Left_23 : 4 1 2 3 4 
+PHY_EDGE_ROW_0_Right_0 : 4 1 2 3 4 
+PHY_EDGE_ROW_10_Left_33 : 4 1 2 3 4 
+PHY_EDGE_ROW_10_Right_10 : 4 1 2 3 4 
+PHY_EDGE_ROW_11_Left_34 : 4 1 2 3 4 
+PHY_EDGE_ROW_11_Right_11 : 4 1 2 3 4 
+PHY_EDGE_ROW_12_Left_35 : 4 1 2 3 4 
+PHY_EDGE_ROW_12_Right_12 : 4 1 2 3 4 
+PHY_EDGE_ROW_13_Left_36 : 4 1 2 3 4 
+PHY_EDGE_ROW_13_Right_13 : 4 1 2 3 4 
+PHY_EDGE_ROW_14_Left_37 : 4 1 2 3 4 
+PHY_EDGE_ROW_14_Right_14 : 4 1 2 3 4 
+PHY_EDGE_ROW_15_Left_38 : 4 1 2 3 4 
+PHY_EDGE_ROW_15_Right_15 : 4 1 2 3 4 
+PHY_EDGE_ROW_16_Left_39 : 4 1 2 3 4 
+PHY_EDGE_ROW_16_Right_16 : 4 1 2 3 4 
+PHY_EDGE_ROW_17_Left_40 : 4 1 2 3 4 
+PHY_EDGE_ROW_17_Right_17 : 4 1 2 3 4 
+PHY_EDGE_ROW_18_Left_41 : 4 1 2 3 4 
+PHY_EDGE_ROW_18_Right_18 : 4 1 2 3 4 
+PHY_EDGE_ROW_19_Left_42 : 4 1 2 3 4 
+PHY_EDGE_ROW_19_Right_19 : 4 1 2 3 4 
+PHY_EDGE_ROW_1_Left_24 : 4 1 2 3 4 
+PHY_EDGE_ROW_1_Right_1 : 4 1 2 3 4 
+PHY_EDGE_ROW_20_Left_43 : 4 1 2 3 4 
+PHY_EDGE_ROW_20_Right_20 : 4 1 2 3 4 
+PHY_EDGE_ROW_21_Left_44 : 4 1 2 3 4 
+PHY_EDGE_ROW_21_Right_21 : 4 1 2 3 4 
+PHY_EDGE_ROW_22_Left_45 : 4 1 2 3 4 
+PHY_EDGE_ROW_22_Right_22 : 4 1 2 3 4 
+PHY_EDGE_ROW_2_Left_25 : 4 1 2 3 4 
+PHY_EDGE_ROW_2_Right_2 : 4 1 2 3 4 
+PHY_EDGE_ROW_3_Left_26 : 4 1 2 3 4 
+PHY_EDGE_ROW_3_Right_3 : 4 1 2 3 4 
+PHY_EDGE_ROW_4_Left_27 : 4 1 2 3 4 
+PHY_EDGE_ROW_4_Right_4 : 4 1 2 3 4 
+PHY_EDGE_ROW_5_Left_28 : 4 1 2 3 4 
+PHY_EDGE_ROW_5_Right_5 : 4 1 2 3 4 
+PHY_EDGE_ROW_6_Left_29 : 4 1 2 3 4 
+PHY_EDGE_ROW_6_Right_6 : 4 1 2 3 4 
+PHY_EDGE_ROW_7_Left_30 : 4 1 2 3 4 
+PHY_EDGE_ROW_7_Right_7 : 4 1 2 3 4 
+PHY_EDGE_ROW_8_Left_31 : 4 1 2 3 4 
+PHY_EDGE_ROW_8_Right_8 : 4 1 2 3 4 
+PHY_EDGE_ROW_9_Left_32 : 4 1 2 3 4 
+PHY_EDGE_ROW_9_Right_9 : 4 1 2 3 4 
+clk : 4 1 2 3 4 
+req_msg[0] : 4 1 2 3 4 
+req_msg[10] : 4 1 2 3 4 
+req_msg[11] : 4 1 2 3 4 
+req_msg[12] : 4 1 2 3 4 
+req_msg[13] : 4 1 2 3 4 
+req_msg[14] : 4 1 2 3 4 
+req_msg[15] : 4 1 2 3 4 
+req_msg[16] : 4 1 2 3 4 
+req_msg[17] : 4 1 2 3 4 
+req_msg[18] : 4 1 2 3 4 
+req_msg[19] : 4 1 2 3 4 
+req_msg[1] : 4 1 2 3 4 
+req_msg[20] : 4 1 2 3 4 
+req_msg[21] : 4 1 2 3 4 
+req_msg[22] : 4 1 2 3 4 
+req_msg[23] : 4 1 2 3 4 
+req_msg[24] : 4 1 2 3 4 
+req_msg[25] : 4 1 2 3 4 
+req_msg[26] : 4 1 2 3 4 
+req_msg[27] : 4 1 2 3 4 
+req_msg[28] : 4 1 2 3 4 
+req_msg[29] : 4 1 2 3 4 
+req_msg[2] : 4 1 2 3 4 
+req_msg[30] : 4 1 2 3 4 
+req_msg[31] : 4 1 2 3 4 
+req_msg[3] : 4 1 2 3 4 
+req_msg[4] : 4 1 2 3 4 
+req_msg[5] : 4 1 2 3 4 
+req_msg[6] : 4 1 2 3 4 
+req_msg[7] : 4 1 2 3 4 
+req_msg[8] : 4 1 2 3 4 
+req_msg[9] : 4 1 2 3 4 
+req_rdy : 4 1 2 3 4 
+req_val : 4 1 2 3 4 
+reset : 4 1 2 3 4 
+resp_msg[0] : 4 1 2 3 4 
+resp_msg[10] : 4 1 2 3 4 
+resp_msg[11] : 4 1 2 3 4 
+resp_msg[12] : 4 1 2 3 4 
+resp_msg[13] : 4 1 2 3 4 
+resp_msg[14] : 4 1 2 3 4 
+resp_msg[15] : 4 1 2 3 4 
+resp_msg[1] : 4 1 2 3 4 
+resp_msg[2] : 4 1 2 3 4 
+resp_msg[3] : 4 1 2 3 4 
+resp_msg[4] : 4 1 2 3 4 
+resp_msg[5] : 4 1 2 3 4 
+resp_msg[6] : 4 1 2 3 4 
+resp_msg[7] : 4 1 2 3 4 
+resp_msg[8] : 4 1 2 3 4 
+resp_msg[9] : 4 1 2 3 4 
+resp_rdy : 4 1 2 3 4 
+resp_val : 4 1 2 3 4 

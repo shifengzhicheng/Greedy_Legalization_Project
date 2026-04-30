@@ -1,0 +1,11 @@
+# Recommended Python version: >= 3.9
+#
+# Custom mode uses only the Python standard library, so there is no mandatory
+# pip dependency for running main.py/checkplacement.py in custom mode.
+#
+# Baseline mode additionally needs the packages below, plus a local C++ compiler
+# with OpenMP support.
+
+cmake>=3.20
+ninja>=1.11
+torch>=2.1

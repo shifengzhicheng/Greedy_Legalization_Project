@@ -1,0 +1,11 @@
+UCLA nodes 1.0
+# Tiny overlap case for sanity checking the legalizer.
+NumNodes : 6
+NumTerminals : 2
+
+a 4 10
+b 5 10
+c 4 10
+d 3 10
+p_in 1 1 terminal
+p_out 1 1 terminal

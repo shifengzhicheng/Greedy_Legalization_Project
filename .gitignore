@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+results/*
+!results/.gitkeep
+build/
+# Large benchmark archives / generated reports
+*.tar.gz
+*.zip
