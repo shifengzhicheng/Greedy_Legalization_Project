@@ -75,11 +75,11 @@ def _print_metrics(metrics: dict) -> None:
             print(f"  - {msg}")
 
 
-def run_one(aux_path: Path, mode: str, out_dir: Path, max_candidate_rows: int = 0) -> dict:
+def run_one(aux_path: Path, mode: str, out_dir: Path) -> dict:
     original = read_bookshelf(aux_path)
     t0 = time.perf_counter()
     if mode == "baseline":
-        legalized = baseline_legalize(original, max_candidate_rows=max_candidate_rows)
+        legalized = baseline_legalize(original)
     elif mode == "custom":
         legalized = custom_legalize(original)
     else:
@@ -110,12 +110,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--bench-root", type=Path, default=PROJECT_ROOT / "test" / "benchmarks", help="Benchmark root directory.")
     parser.add_argument("--mode", choices=["baseline", "custom"], required=True, help="Which legalizer to run.")
     parser.add_argument("--out-dir", type=Path, default=PROJECT_ROOT / "results", help="Output directory for .pl and metrics.json.")
-    parser.add_argument("--max-candidate-rows", type=int, default=0, help="Baseline only: 0 tries all rows; N tries closest N rows.")
     args = parser.parse_args(argv)
 
     try:
         aux_path = args.aux.resolve() if args.aux else _find_aux_from_case(args.case or "toy_tiny", args.bench_root.resolve())
-        metrics = run_one(aux_path, args.mode, args.out_dir.resolve(), max_candidate_rows=args.max_candidate_rows)
+        metrics = run_one(aux_path, args.mode, args.out_dir.resolve())
     except Exception as exc:  # Keep CLI friendly for students.
         print(f"ERROR: {exc}", file=sys.stderr)
         if args.mode == "baseline":

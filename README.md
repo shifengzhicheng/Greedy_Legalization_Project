@@ -1,186 +1,111 @@
 # Greedy Legalization Teaching Repo
 
-这个仓库是一个基于 Bookshelf format 的 standard-cell legalization 教学项目。目标是：**在满足合法布局约束的前提下，尽量减小 `delta_hpwl`**。学生主要实现自己的 custom legalizer，并和内置 baseline 在 AES / JPEG / GCD benchmark 上比较结果。
+这个仓库是一个基于 Bookshelf format 的 standard-cell legalization 教学 skeleton。
+
+**主要目标**是输出一个 legal placement。`delta_hpwl`、displacement 和 runtime 作为分析算法 trade-off 的参考指标。
+
+仓库内置的 baseline 是一个 **optional reference implementation**，用于帮助理解流程、输出格式和调试方法；课程不强制要求 beat baseline。
 
 ## Repo purpose
 
-这个 REPO 的目的有两点：
-
-1. 提供一个可直接运行的 legalization 框架。
-2. 专注于 legalizer 本身，而不是自己重写 parser、metric、checker 或 benchmark runner。
-
-仓库已经内置：
+这个仓库提供：
 
 - Bookshelf `.aux/.nodes/.nets/.pl/.scl` 解析器
-- HPWL、displacement、legality checker
-- baseline mode：DREAMPlace greedy legalization + abacus legalization 的最小复用版本
-- custom mode：学生自己的 legalization 入口
-- `run.sh`：调用 `main.py` 跑一个 case 的 baseline/custom
+- legality checker 和常用 metrics
+- `main.py`：统一运行 custom / reference baseline
+- `src/custom_legalizer.py`：学生实现入口
+- `run.sh`：一键运行配置好的 benchmark case
 - `checkplacement.py`：独立检查某个 placement 是否 legal
 - `test/toy_tiny`：极小调试样例
 - `test/benchmarks/AES|JPEG|GCD`：课程 benchmark
 
-## Legalization problem overview
+## Quick start
 
-legalization 的输入通常是 global placement 之后的 placement。此时 cell 的相对位置通常已经不错，但可能存在 overlap、未对齐 row/site、超出 row 边界等问题。legalizer 的任务是把所有 movable cell 调整到**合法**位置。
-
-这个问题的核心目标是：
-
-- **Primary objective**：legalize 所有 cell，同时尽量减小 `delta_hpwl`
-
-常见参考优化目标包括：
-
-- `avg_disp_l1`
-- `max_disp_l1`
-- `runtime_sec`
-
-你通常需要在 **wirelength**、**displacement** 和 **runtime** 之间做 trade-off。
-
-## Basic concepts
-
-### Cell height
-
-standard cell 有固定的 width 和 height。这个项目默认教学子集主要关注 single-row movable cell，也就是 movable cell 的高度不能超过 row height。
-
-### Row
-
-placement row 是可以放置 standard cell 的水平带状区域。cell 的 `y` 必须落在合法 row 上。
-
-### Site / site pitch
-
-row 被离散成一个个 site。cell 的左下角 `x` 需要对齐到 site grid，不能落在任意实数位置。
-
-## Legality constraints
-
-当前 checker 会检查：
-
-- movable cell 的 `y` 是否落在合法 row 上
-- cell height 是否不超过 row height
-- `x` 是否在 row 范围内
-- `x` 是否 snap 到 site grid
-- 同一 row 内 movable cell 是否无 overlap
-- movable cell 是否与 fixed terminal / macro overlap
-
-如果任意一条不满足，则该 placement 不是 legal placement。
-
-## Directory layout
-
-```text
-GreedyLegalization/
-├── README.md
-├── requirements.txt
-├── run.sh
-├── checkplacement.py
-├── configs/
-│   └── cases.json
-├── results/
-├── main.py
-├── check_benchmarks.py
-├── src/
-│   ├── custom_legalizer.py
-│   ├── baseline/
-│   │   ├── __init__.py
-│   │   ├── abacus_legalizer.py
-│   │   ├── CMakeLists.txt
-│   │   └── ops/
-│   └── database/
-│       ├── bookshelf.py
-│       ├── design.py
-│       └── metrics.py
-└── test/
-    ├── toy_tiny/
-    └── benchmarks/
-        ├── AES/
-        ├── JPEG/
-        └── GCD/
-```
-
-## Installation / dependencies
-
-### Custom mode only
-
-如果只做自己的 legalizer，基础 Python 环境即可：
+先确认 benchmark 文件齐全：
 
 ```bash
 python --version
 python check_benchmarks.py
 ```
 
-推荐 Python >= 3.9。`requirements.txt` 主要是为了 baseline mode 准备的；custom mode 本身不依赖额外 pip 包。
-
-### Baseline mode
-
-如果你还想运行 baseline，需要额外准备：
-
-- `torch`
-- `cmake`
-- 支持 OpenMP 的本地 C++ 编译环境
-
-运行 baseline 所需的最小源码已经放在仓库里，本地构建即可。
-仓库根目录也提供了 `CMakeLists.txt`，可以直接在 repo root 发起 build。
-
-## TODO for students
-
-你的主要修改应该集中在文件：
-
-```text
-src/custom_legalizer.py
-```
-
-默认实现只是直接返回输入 placement，因此通常不会 legal。你需要自己完成 legalization。
-
-1. 选择合法 row。
-2. 将 `x` snap 到 site grid。
-3. 按 row 内顺序消除 overlap。
-4. 必要时在相邻 row 之间 spill。
-5. 用 HPWL / displacement 作为 tie-breaker。
-6. 保持 fixed objects 不动。
-
-## How to run experiments
-
-### Run a single custom experiment
+运行一个最小 custom 示例：
 
 ```bash
 python main.py --aux test/toy_tiny/toy_tiny.aux --mode custom --out-dir results
 ```
 
-### Run a single baseline experiment
+## Student task
 
-先构建 baseline：
+学生主要修改：
+
+```text
+src/custom_legalizer.py
+```
+
+默认实现只是返回输入 placement，因此通常不会 legal。你需要实现自己的 legalization 算法，让输出先满足 `legalized=True`。
+
+建议优先完成：
+
+1. 保持 fixed terminals / macros 不动。
+2. 给每个 movable cell 选择合法 row。
+3. 将 `x` 对齐到 site grid。
+4. 消除 row 内 overlap。
+5. 尽量避免不必要的 HPWL / displacement 增长。
+
+## Run benchmarks
+
+运行单个 benchmark：
+
+```bash
+bash run.sh AES
+bash run.sh JPEG
+bash run.sh GCD
+```
+
+运行全部配置好的 benchmark：
+
+```bash
+bash run.sh all
+```
+
+需要一次干净运行时，可以清空旧结果后再生成 `results/summary.csv`：
+
+```bash
+bash run.sh all --clean
+```
+
+`run.sh` 也支持调试样例：
+
+```bash
+bash run.sh toy_tiny
+```
+
+不带参数时，`run.sh` 会读取 `configs/cases.json` 里的默认 case。
+
+## Optional reference baseline
+
+如果你想运行 reference baseline，请先确认已经安装好 `requirements.txt` 中的依赖，然后构建 baseline ops：
 
 ```bash
 cmake -S . -B build/baseline_ops -DPython3_EXECUTABLE="$(which python)"
 cmake --build build/baseline_ops -j
 ```
 
-然后运行：
+构建完成后可以直接运行：
 
 ```bash
 python main.py --aux test/toy_tiny/toy_tiny.aux --mode baseline --out-dir results
 ```
 
-### Run a case with `run.sh`
-
-`run.sh` 会清晰地调用两条 `python main.py` 指令：一条跑 baseline，一条跑 custom。
-
-```bash
-bash run.sh
-bash run.sh AES
-```
-
-不带参数时，`run.sh` 读取 `configs/cases.json` 里的单个默认 case。带参数时，直接运行你指定的那个 case。
-
 如果 baseline 尚未构建，`run.sh` 会跳过 baseline，只继续跑 custom。
 
 ## How to check legality
-
-可以单独检查某个 placement 是否 legal：
 
 ```bash
 python checkplacement.py --aux test/toy_tiny/toy_tiny.aux --pl results/toy_tiny/custom/toy_tiny.custom.pl
 ```
 
-也可以输出 JSON：
+输出 JSON：
 
 ```bash
 python checkplacement.py --aux test/toy_tiny/toy_tiny.aux --pl results/toy_tiny/custom/toy_tiny.custom.pl --json
@@ -201,7 +126,58 @@ python checkplacement.py --aux test/toy_tiny/toy_tiny.aux --pl results/toy_tiny/
 - `runtime_sec`
 - `legalized`
 
-先要求 `legalized=True`，再比较 `delta_hpwl`、displacement 和 runtime。
+功能要求是：
+
+```text
+legalized=True
+```
+
+在满足合法性之后，再使用 `delta_hpwl`、displacement 和 runtime 分析算法表现。baseline 只是参考点，不是必须达到的目标。
+
+## Installation / dependencies
+
+### Installation
+
+建议先安装仓库依赖：
+
+```bash
+pip install -r requirements.txt
+```
+
+其中包含 reference baseline 所需的 Python 包。除此之外，baseline 还需要：
+
+- `cmake`
+- `ninja`
+- 支持 OpenMP 的本地 C++ 编译环境
+
+## Directory layout
+
+```text
+.
+├── README.md
+├── LICENSE
+├── THIRD_PARTY_NOTICES.md
+├── requirements.txt
+├── run.sh
+├── checkplacement.py
+├── check_benchmarks.py
+├── configs/
+│   └── cases.json
+├── main.py
+├── src/
+│   ├── custom_legalizer.py
+│   ├── baseline/
+│   └── database/
+├── test/
+│   ├── README.md
+│   ├── toy_tiny/
+│   └── benchmarks/
+│       ├── README.md
+│       ├── AES/
+│       ├── JPEG/
+│       └── GCD/
+└── results/
+```
 
 ## Output files
 
@@ -210,3 +186,5 @@ results/<design>/<mode>/<design>.<mode>.pl
 results/<design>/<mode>/metrics.json
 results/summary.csv
 ```
+
+`results/summary.csv` 汇总当前 `results/` 目录下已有的 metrics。若想得到干净 summary，请使用 `bash run.sh ... --clean`，或手动删除旧结果后再运行。

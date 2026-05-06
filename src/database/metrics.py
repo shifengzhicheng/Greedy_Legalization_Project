@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, List, Tuple
 import math
 
-from .design import Design, Placement, Row
+from .design import Design, Row
 
 EPS = 1e-6
 
@@ -56,19 +56,6 @@ def hpwl(design: Design) -> float:
 
 def displacement(original: Design, legalized: Design) -> Tuple[float, float, float, float]:
     """Return avg L1, max L1, avg L2, max L2 displacement over movable cells."""
-    cumulative_l1 = getattr(legalized, "_cumulative_displacement_l1", None)
-    cumulative_l2 = getattr(legalized, "_cumulative_displacement_l2", None)
-    if cumulative_l1 is not None and cumulative_l2 is not None:
-        l1_values = [float(cumulative_l1[name]) for name in original.movable_names if name in cumulative_l1]
-        l2_values = [float(cumulative_l2[name]) for name in original.movable_names if name in cumulative_l2]
-        if l1_values and l2_values:
-            return (
-                sum(l1_values) / len(l1_values),
-                max(l1_values),
-                sum(l2_values) / len(l2_values),
-                max(l2_values),
-            )
-
     l1_values: List[float] = []
     l2_values: List[float] = []
     for name in original.movable_names:
@@ -165,7 +152,7 @@ def collect_metrics(original: Design, legalized: Design, runtime_sec: float) -> 
     legal = check_legality(legalized)
     delta = final_hpwl - original_hpwl
     delta_pct = (delta / original_hpwl * 100.0) if abs(original_hpwl) > EPS else 0.0
-    return {
+    metrics = {
         "design": original.name,
         "num_nodes": len(original.nodes),
         "num_movable": len(original.movable_names),
@@ -185,3 +172,18 @@ def collect_metrics(original: Design, legalized: Design, runtime_sec: float) -> 
         "num_violations": legal.num_violations,
         "violations": legal.violations,
     }
+    path_l1 = getattr(legalized, "reference_path_disp_l1", None)
+    path_l2 = getattr(legalized, "reference_path_disp_l2", None)
+    if path_l1 is not None and path_l2 is not None:
+        l1_values = [float(path_l1[name]) for name in original.movable_names if name in path_l1]
+        l2_values = [float(path_l2[name]) for name in original.movable_names if name in path_l2]
+        if l1_values and l2_values:
+            metrics.update(
+                {
+                    "reference_path_avg_disp_l1": sum(l1_values) / len(l1_values),
+                    "reference_path_max_disp_l1": max(l1_values),
+                    "reference_path_avg_disp_l2": sum(l2_values) / len(l2_values),
+                    "reference_path_max_disp_l2": max(l2_values),
+                }
+            )
+    return metrics

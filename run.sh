@@ -3,9 +3,63 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export PYTHONPATH="${ROOT}:${PYTHONPATH:-}"
-BENCH_ROOT="${BENCH_ROOT:-${ROOT}/test/benchmarks}"
 OUT_DIR="${OUT_DIR:-${ROOT}/results}"
 mkdir -p "${OUT_DIR}"
+
+usage() {
+  cat <<'EOF'
+Usage: bash run.sh [CASE|all] [--clean]
+
+Examples:
+  bash run.sh
+  bash run.sh AES
+  bash run.sh JPEG --clean
+  bash run.sh toy_tiny
+  bash run.sh all --clean
+EOF
+}
+
+CASE_NAME=""
+CLEAN=0
+for arg in "$@"; do
+  case "$arg" in
+    --clean)
+      CLEAN=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      if [ -n "${CASE_NAME}" ]; then
+        usage >&2
+        exit 2
+      fi
+      CASE_NAME="$arg"
+      ;;
+  esac
+done
+
+if [ -z "${CASE_NAME}" ]; then
+  CASE_NAME="$(ROOT="${ROOT}" python - <<'PY'
+import json
+import os
+from pathlib import Path
+
+root = Path(os.environ["ROOT"])
+config = json.loads((root / "configs" / "cases.json").read_text(encoding="utf-8"))
+default_case = config.get("default")
+if not default_case:
+    raise SystemExit("configs/cases.json must contain 'default'")
+print(default_case)
+PY
+)"
+fi
+
+if [ "${CLEAN}" -eq 1 ]; then
+  rm -rf "${OUT_DIR}"/*
+  mkdir -p "${OUT_DIR}"
+fi
 
 BASELINE_AVAILABLE=1
 if ! python - <<'PY'
@@ -17,59 +71,79 @@ except Exception:
 PY
 then
   BASELINE_AVAILABLE=0
-  echo "[WARN] Baseline ops are not built. Build them with CMake under 'src/baseline' or from the repo root."
+  echo "[WARN] Reference baseline is unavailable in the current Python environment."
+  echo "[WARN] Install Python dependencies with: pip install -r requirements.txt"
+  echo "[WARN] Then build baseline ops with CMake from the repo root."
 fi
 
-if [ "$#" -gt 1 ]; then
-  echo "Usage: bash run.sh [CASE]" >&2
-  exit 2
-fi
-
-if [ "$#" -eq 1 ]; then
-  CASE_NAME="$1"
-else
-  CASE_NAME="$(ROOT="${ROOT}" python - <<'PY'
+if [ "${CASE_NAME}" = "all" ]; then
+  mapfile -t CASES < <(ROOT="${ROOT}" python - <<'PY'
 import json
 import os
 from pathlib import Path
 
 root = Path(os.environ["ROOT"])
 config = json.loads((root / "configs" / "cases.json").read_text(encoding="utf-8"))
-name = config.get("name")
-if not name:
-    raise SystemExit("configs/cases.json must contain a single 'name'")
-print(name)
+for case in config.get("cases", []):
+    print(case["name"])
 PY
-)"
-fi
-
-case_dir="${BENCH_ROOT}/${CASE_NAME}"
-if [ ! -d "${case_dir}" ]; then
-  echo "[ERROR] Missing case directory ${case_dir}." >&2
-  exit 1
-fi
-
-aux_path="$(find "${case_dir}" -maxdepth 1 -type f -name "*.aux" | sort | head -n 1 || true)"
-if [ -z "${aux_path}" ]; then
-  echo "[ERROR] No .aux found under ${case_dir}." >&2
-  exit 1
-fi
-
-echo ""
-echo "============================================================"
-echo "Case: ${CASE_NAME}"
-echo "AUX : ${aux_path}"
-echo "============================================================"
-
-if [ "${BASELINE_AVAILABLE}" -eq 1 ]; then
-  python main.py --aux "${aux_path}" --mode baseline --out-dir "${OUT_DIR}"
-  echo ""
+)
+  if [ "${#CASES[@]}" -eq 0 ]; then
+    echo "[ERROR] No cases configured in configs/cases.json." >&2
+    exit 1
+  fi
 else
-  echo "[INFO] Skipping baseline for ${CASE_NAME}; baseline ops are unavailable."
-  echo ""
+  CASES=("${CASE_NAME}")
 fi
 
-python main.py --aux "${aux_path}" --mode custom --out-dir "${OUT_DIR}"
+resolve_aux() {
+  local case_name="$1"
+  ROOT="${ROOT}" CASE_NAME="${case_name}" python - <<'PY'
+import os
+from pathlib import Path
+
+root = Path(os.environ["ROOT"])
+case_name = os.environ["CASE_NAME"]
+bench_root = root / "test" / "benchmarks"
+candidates = [bench_root / case_name, root / "test" / case_name, root / "test" / "benchmarks" / case_name]
+for path in candidates:
+    if path.is_file() and path.suffix == ".aux":
+        print(path.resolve())
+        raise SystemExit(0)
+    if path.is_dir():
+        aux_files = sorted(path.glob("*.aux"))
+        if aux_files:
+            print(aux_files[0].resolve())
+            raise SystemExit(0)
+raise SystemExit(f"Cannot find .aux for case '{case_name}'")
+PY
+}
+
+run_case() {
+  local case_name="$1"
+  local aux_path
+  aux_path="$(resolve_aux "${case_name}")"
+
+  echo ""
+  echo "============================================================"
+  echo "Case: ${case_name}"
+  echo "AUX : ${aux_path}"
+  echo "============================================================"
+
+  if [ "${BASELINE_AVAILABLE}" -eq 1 ]; then
+    python main.py --case "${case_name}" --mode baseline --out-dir "${OUT_DIR}"
+    echo ""
+  else
+    echo "[INFO] Skipping baseline for ${case_name}; reference baseline ops are unavailable."
+    echo ""
+  fi
+
+  python main.py --case "${case_name}" --mode custom --out-dir "${OUT_DIR}"
+}
+
+for case_name in "${CASES[@]}"; do
+  run_case "${case_name}"
+done
 
 OUT_DIR="${OUT_DIR}" python - <<'PY'
 import csv
@@ -94,4 +168,5 @@ with open(summary_path, "w", newline="", encoding="utf-8") as f:
     writer.writeheader()
     writer.writerows(rows)
 print(f"\nSummary CSV: {summary_path}")
+print("Summary includes all metrics currently present under results/.")
 PY

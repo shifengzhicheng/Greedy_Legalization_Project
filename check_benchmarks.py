@@ -26,20 +26,40 @@ def file_size_text(path: Path) -> str:
     return f"{size:.1f}GB"
 
 
-def main() -> int:
+def load_cases() -> tuple[str, list[dict]]:
     config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-    overall_ok = True
+    default_case = config.get("default", "")
+    cases = config.get("cases", [])
+    if not cases:
+        raise ValueError("configs/cases.json must contain a non-empty 'cases' list")
+    return default_case, cases
 
-    case_name = config["name"]
-    aux_path = (PROJECT_ROOT / config["expected_aux"]).resolve()
-    case_dir = aux_path.parent
-    print(f"[{case_name}]")
-    print(f"  directory: {case_dir}")
-    if not aux_path.exists():
-        overall_ok = False
-        print(f"  status: MISSING aux file {aux_path.name}")
-        print()
-    else:
+
+def main() -> int:
+    try:
+        default_case, cases = load_cases()
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+
+    overall_ok = True
+    print(f"Configured cases: {', '.join(case['name'] for case in cases)}")
+    if default_case:
+        print(f"Default case: {default_case}")
+    print()
+
+    for case in cases:
+        case_name = case["name"]
+        aux_path = (PROJECT_ROOT / case["aux"]).resolve()
+        case_dir = aux_path.parent
+        print(f"[{case_name}]")
+        print(f"  directory: {case_dir}")
+        if not aux_path.exists():
+            overall_ok = False
+            print(f"  status: MISSING aux file {aux_path.name}")
+            print()
+            continue
+
         missing_required = []
         for ext in REQUIRED_EXTS:
             path = case_dir / f"{case_name}.{ext}"

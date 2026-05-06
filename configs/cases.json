@@ -1,7 +1,24 @@
 {
-  "description": "Default course case bundled with the teaching repo.",
-  "name": "AES",
-  "technology": "NG45",
-  "expected_aux": "test/benchmarks/AES/AES.aux",
-  "design": "aes_cipher_top"
+  "description": "Course benchmark cases bundled with the teaching repo.",
+  "default": "AES",
+  "cases": [
+    {
+      "name": "AES",
+      "technology": "NG45",
+      "aux": "test/benchmarks/AES/AES.aux",
+      "design": "aes_cipher_top"
+    },
+    {
+      "name": "JPEG",
+      "technology": "NG45",
+      "aux": "test/benchmarks/JPEG/JPEG.aux",
+      "design": "jpeg_encoder"
+    },
+    {
+      "name": "GCD",
+      "technology": "NG45",
+      "aux": "test/benchmarks/GCD/GCD.aux",
+      "design": "gcd"
+    }
+  ]
 }

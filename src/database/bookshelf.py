@@ -76,7 +76,7 @@ def _parse_nodes(path: Path) -> tuple[Dict[str, Node], List[str]]:
     return nodes, order
 
 
-def _parse_pl(path: Path, nodes: Dict[str, Node]) -> Dict[str, Placement]:
+def _parse_pl(path: Path, nodes: Dict[str, Node], update_fixed_status: bool = True, honor_fixed_tokens: bool = True) -> Dict[str, Placement]:
     placements: Dict[str, Placement] = {}
     for line in _data_lines(path):
         if line.startswith("UCLA"):
@@ -98,8 +98,8 @@ def _parse_pl(path: Path, nodes: Dict[str, Node]) -> Dict[str, Placement]:
             idx = toks.index(":")
             if idx + 1 < len(toks):
                 orient = toks[idx + 1]
-        fixed = any(tok.upper().startswith("/FIXED") for tok in toks)
-        if fixed:
+        fixed = any(tok.upper().startswith("/FIXED") for tok in toks) if honor_fixed_tokens else False
+        if fixed and update_fixed_status:
             nodes[name].is_terminal = True
             if not nodes[name].terminal_type:
                 nodes[name].terminal_type = "terminal"
@@ -258,7 +258,7 @@ def read_bookshelf(aux_path: str | Path) -> Design:
     aux_path = Path(aux_path).resolve()
     files = _parse_aux(aux_path)
     nodes, node_order = _parse_nodes(files["nodes"])
-    placements = _parse_pl(files["pl"], nodes)
+    placements = _parse_pl(files["pl"], nodes, update_fixed_status=True, honor_fixed_tokens=True)
     nets = _parse_nets(files["nets"])
     rows = _parse_scl(files["scl"])
     return Design(
@@ -275,7 +275,7 @@ def read_bookshelf(aux_path: str | Path) -> Design:
 
 def load_placement(design: Design, pl_path: str | Path) -> Design:
     updated = design.copy()
-    parsed = _parse_pl(Path(pl_path).resolve(), updated.nodes)
+    parsed = _parse_pl(Path(pl_path).resolve(), updated.nodes, update_fixed_status=False, honor_fixed_tokens=False)
     updated.placements.update(parsed)
     return updated
 

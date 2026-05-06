@@ -1,37 +1,35 @@
-# Course benchmarks
+# Benchmark data
 
-本目录包含课程使用的 Bookshelf benchmark：
+These benchmark cases are used for the greedy legalization teaching assignment.
+
+Cases:
 
 - `AES`
 - `JPEG`
 - `GCD`
 
-每个 case 目录都应包含至少以下文件：
+Technology:
 
-```text
-<CASE>.aux
-<CASE>.nodes
-<CASE>.nets
-<CASE>.pl
-<CASE>.scl
-```
+- `NG45`
 
-运行前可检查 benchmark 完整性：
+Each case follows Bookshelf format and includes:
+
+- `.aux`
+- `.nodes`
+- `.nets`
+- `.pl`
+- `.scl`
+
+The `.pl` file is the input placement before legalization.
+
+Useful commands:
 
 ```bash
 python check_benchmarks.py
-```
-
-运行全部 benchmark：
-
-```bash
-bash run.sh
-```
-
-只运行一个 benchmark：
-
-```bash
 bash run.sh AES
 bash run.sh JPEG
 bash run.sh GCD
+bash run.sh all
 ```
+
+If you add or replace benchmark data, keep all Bookshelf component files in the same case directory and make sure the `.aux` file references the matching filenames.

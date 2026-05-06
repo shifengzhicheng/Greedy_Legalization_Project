@@ -1,4 +1,4 @@
-"""Baseline legalizer backed by DREAMPlace greedy + abacus legalization."""
+"""Optional reference legalizer based on DREAMPlace greedy + abacus legalization."""
 from __future__ import annotations
 
 from collections import Counter
@@ -19,7 +19,7 @@ def _import_dreamplace_legalizers():
     except Exception as exc:
         last_exc = exc
 
-    repo_root = Path(__file__).resolve().parents[3]
+    repo_root = Path(__file__).resolve().parents[2]
     candidates = []
     env_home = os.environ.get("DREAMPLACE_HOME")
     if env_home:
@@ -88,8 +88,7 @@ def _pin_weights(design: Design, order: list[str]) -> list[float]:
     return [float(max(counts.get(name, 0), 1)) for name in order]
 
 
-def legalize(design: Design, max_candidate_rows: int = 0) -> Design:
-    del max_candidate_rows
+def legalize(design: Design) -> Design:
     greedy_legalize, abacus_legalize = _import_dreamplace_legalizers()
     import torch
 
@@ -190,6 +189,6 @@ def legalize(design: Design, max_candidate_rows: int = 0) -> Design:
             + (abacus_dx * abacus_dx + abacus_dy * abacus_dy) ** 0.5
         )
 
-    legalized._cumulative_displacement_l1 = displacement_l1
-    legalized._cumulative_displacement_l2 = displacement_l2
+    legalized.reference_path_disp_l1 = displacement_l1
+    legalized.reference_path_disp_l2 = displacement_l2
     return legalized
