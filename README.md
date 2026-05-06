@@ -19,6 +19,14 @@
 - `test/toy_tiny`：极小调试样例
 - `test/benchmarks/AES|JPEG|GCD`：课程 benchmark
 
+## Problem definition
+
+Legalization 的问题定义、基本概念、合法性约束和优化目标详见：
+
+[docs/legalization.md](docs/legalization.md)
+
+该文档介绍 cell、row、site grid、fixed objects、net / pin / HPWL、displacement、runtime，以及本项目 checker 采用的合法性条件。README 只保留运行和提交所需的最小说明。
+
 ## Quick start
 
 先确认 benchmark 文件齐全：
@@ -163,6 +171,8 @@ pip install -r requirements.txt
 ├── check_benchmarks.py
 ├── configs/
 │   └── cases.json
+├── docs/
+│   └── legalization.md
 ├── main.py
 ├── src/
 │   ├── custom_legalizer.py
