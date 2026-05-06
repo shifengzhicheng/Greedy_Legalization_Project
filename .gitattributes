@@ -1,0 +1,11 @@
+# Bookshelf benchmark/data files
+*.aux linguist-language=Text
+*.nodes linguist-language=Text
+*.nets linguist-language=Text
+*.scl linguist-language=Text
+*.wts linguist-language=Text
+*.shapes linguist-language=Text
+*.route linguist-language=Text
+
+# Bookshelf placement files, not Prolog
+*.pl linguist-language=Text
